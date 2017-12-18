@@ -58,7 +58,7 @@ data2=data2.map(lambda line:line.encode('utf-8').split(','))\
 #
 # ###(个人编号,(缴费年份,缴费次数,出生日期，性别）
 # ###(个人编号,(缴费年份,缴费次数,年龄，性别,状态）
-# ####((年份，状态)，次数)
+# ####((年份，状态)，参保人数)
 result=data1.join(data2)\
     .map(ageComputed)\
     .filter(lambda (key,value):(isinstance(value,int)==False))\
