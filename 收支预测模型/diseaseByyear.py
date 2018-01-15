@@ -26,8 +26,8 @@ result=hospital.map(precessing)\
     .map(lambda (key,value):((key[0],value[1]),(key[1],value[0],value[2])))\
     .sortByKey(False)      ###降序排序
 
-####（（年份，统筹费用支出),(病种,总费用，住院次数)）
+####（（年份，统筹费用支出),(病种,总费用，住院次数，均次统筹费用支出,均次住院总费用)）
 out=open('output/diseaseByyear.csv','w+')
 for (key,value)in result.collect():
-    out.write("%s,%.2f,%s,%.2f,%d\n"%(key[0],key[1],value[0],value[1],value[2]))
+    out.write("%s,%.2f,%s,%.2f,%d,%.2f,%.2f\n"%(key[0],key[1],value[0],value[1],value[2],key[1]/value[2],value[1]/value[2]))
 out.close()

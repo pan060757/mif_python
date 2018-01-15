@@ -1,0 +1,4 @@
+###分等级计算住院统筹支付
+Function costBygrade(a, b, c):
+  costBygrade = a * b * c
+End Function

@@ -105,7 +105,7 @@ data2=data2.map(lambda line:line.encode('utf-8').split(','))\
 ####((年份，在职离退状态),(医院等级，住院次数))
 hospital=data1.join(data2)\
      .map(h_ageComputed)\
-    .filter(lambda (key,value):cmp(key[0],"2009")>0 and cmp(key[0],"2017")<0 and key[1]!='5')\
+    .filter(lambda (key,value):cmp(key[0],"2005")>0 and cmp(key[0],"2017")<0 and key[1]!='5')\
     .reduceByKey(lambda a,b:a+b)\
     .map(lambda (key,value):((key[0],key[2]),(key[1],value)))\
     .sortByKey()
@@ -133,12 +133,16 @@ number=data3.join(data4)\
     .reduceByKey(lambda a,b:a+b)\
     .sortByKey()\
 
-###((在职，离退状态)，（医院等级，住院次数，参保人数）)
+###((年份，在职离退状态)，（医院等级，住院次数，参保人数）)
+###((在职离退状态，医院等级)，（年份，住院次数，参保人数,住院率）)
 result=hospital.join(number)\
+    .sortByKey()\
+    .map(lambda (key,value):((key[1],value[0][0]),(key[0],value[0][1],value[1],value[0][1]*1.0/value[1])))\
     .sortByKey()
 
-####（（年份.在职离退状态)，（医院等级，住院次数，参保人数))
+###((在职离退状态，医院等级)，（年份，住院次数，参保人数,住院率）)
 out=open('output/hospitalizationRatioBygroup.csv','w+')
 for (key,value) in result.collect():
-     out.write("%s,%s,%s,%d,%d\n"%(key[0],key[1],value[0][0],value[0][1],value[1]))
+    line = reduce(lambda a, b: "%s,%s" % (a, b), value).encode("utf-8")
+    out.write("%s,%s,%s\n" % (key[0],key[1],line))
 out.close()

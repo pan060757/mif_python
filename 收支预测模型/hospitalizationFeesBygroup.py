@@ -52,25 +52,25 @@ def ageComputed((key,value)):
 def postprocessing((key,value)):
     try:
         if(key[1]=='0'and key[2]=='0'):
-            return (key, (value[0], value[1], 500,0.1))  ##无等级在职
+            return (key, (value[0], value[1], value[2], value[3], value[4],500,0.1))  ##无等级在职
         elif (key[1]=='0'and key[2]=='1'):
-            return (key, (value[0], value[1], 400, 0.04))   ##无等级退休
+            return (key, (value[0], value[1],value[2], value[3], value[4], 400, 0.04))   ##无等级退休
         elif (key[1]=='1'and key[2]=='0'):
-            return (key, (value[0], value[1], 500,0.1))  ##一级在职
+            return (key, (value[0], value[1],value[2], value[3], value[4], 500,0.1))  ##一级在职
         elif (key[1]=='1'and key[2]=='1'):
-            return (key, (value[0], value[1], 400, 0.04))  ##一级退休
+            return (key, (value[0], value[1],value[2], value[3], value[4], 400, 0.04))  ##一级退休
         elif(key[1]=='2'and key[2]=='0'):
-            return (key, (value[0], value[1], 600, 0.15)) ##二级在职
+            return (key, (value[0], value[1],value[2], value[3], value[4], 600, 0.15)) ##二级在职
         elif (key[1]=='2'and key[2]=='1'):
-            return (key, (value[0], value[1], 500, 0.08)) ##二级在职
+            return (key, (value[0], value[1],value[2], value[3], value[4], 500, 0.08)) ##二级在职
         elif (key[1]=='3'and key[2]=='0'):
-            return (key, (value[0], value[1], 700, 0.2)) ##三级在职
+            return (key, (value[0], value[1],value[2], value[3], value[4], 700, 0.2)) ##三级在职
         elif (key[1]=='3'and key[2]=='1'):
-            return (key, (value[0], value[1], 600, 0.12)) ##三级退休
+            return (key, (value[0], value[1],value[2], value[3], value[4], 600, 0.12)) ##三级退休
         elif (key[1]=='4'and key[2]=='0'):
-            return (key, (value[0], value[1], 500,0.1))   ##社区在职
+            return (key, (value[0], value[1],value[2], value[3], value[4], 500,0.1))   ##社区在职
         elif (key[1]=='4'and key[2]=='1'):
-            return (key, (value[0], value[1], 400,0.04))  ##社区退休
+            return (key, (value[0], value[1],value[2], value[3], value[4], 400,0.04))  ##社区退休
     except Exception:
         return (str(999999),0)
 
@@ -92,21 +92,25 @@ data2=data2.map(lambda line:line.encode('utf-8').split(','))\
 
 
 ####（（年份.医院等级，在职离退状态)，(住院费用，统筹支付，次数))
-####（（年份.医院等级，在职离退状态)，(均次住院费用，均次统筹支付))
-####（（年份.医院等级，在职离退状态)，(均次住院费用，均次统筹支付,起付线,报销比例))
+####（（年份.医院等级，在职离退状态)，(住院费用，统筹支付，次数，均次住院费用，均次统筹支付))
+####（（年份.医院等级，在职离退状态)，(住院费用，统筹支付，次数，均次住院费用，均次统筹支付,起付线,报销比例))\
+####（（在职离退状态,医院等级)，(年份.住院费用，统筹支付，次数，均次住院费用，均次统筹支付,起付线,报销比例))
 result=data1.join(data2)\
      .map(ageComputed)\
     .filter(lambda(key,value):(isinstance(value,int)==False))\
     .filter(lambda (key,value):cmp(key[0],"2009")>0 and cmp(key[0],"2017")<0 and key[1]!='5')\
     .reduceByKey(lambda a,b:(a[0]+b[0],a[1]+b[1],a[2]+b[2]))\
-    .map(lambda (key,value):(key,(value[0]/value[2],value[1]/value[2])))\
+    .map(lambda (key,value):(key,(value[0],value[1],value[2],value[0]/value[2],value[1]/value[2])))\
     .map(postprocessing)\
     .filter(lambda(key,value):(isinstance(value,int)==False))\
+    .sortByKey()\
+    .map(lambda (key,value):((key[2],key[1]),(key[0],value[0],value[1],value[2],value[3],value[4],value[5],value[6])))\
     .sortByKey()
 
 
-####（（年份.医院等级，在职离退状态)，(均次住院费用，均次统筹支付,起付线，自付比例))
+####（（在职离退状态,医院等级)，(年份.住院费用，统筹支付，次数，均次住院费用，均次统筹支付,起付线,报销比例))
 out=open('output/hospitalizationFeesBygroup.csv','w+')
 for (key,value) in result.collect():
-    out.write("%s,%s,%s,%.2f,%.2f,%d,%.2f\n"%(key[0],key[1],key[2],value[0],value[1],value[2],value[3]))
+    line = reduce(lambda a, b: "%s,%s" % (a, b), value).encode("utf-8")
+    out.write("%s,%s,%s\n" % (key[0],key[1],line))
 out.close()

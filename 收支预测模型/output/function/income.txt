@@ -1,0 +1,4 @@
+#### ’»Î‘§≤‚
+Function income(a, b):
+  income = a * b * 0.063
+End Function

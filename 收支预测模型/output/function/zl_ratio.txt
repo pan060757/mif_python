@@ -1,0 +1,4 @@
+###供养比计算
+Function zl_ratio(a, b):
+  zl_ratio = a / b
+End Function

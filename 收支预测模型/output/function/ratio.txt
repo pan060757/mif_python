@@ -1,0 +1,4 @@
+###增长率计算
+Function ratio(a, b):
+  ratio = (a - b) / b
+End Function

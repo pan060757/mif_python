@@ -1,0 +1,4 @@
+#####统筹费用支出
+Function cost(a, b):
+  cost = a * b * 0.0978
+End Function
