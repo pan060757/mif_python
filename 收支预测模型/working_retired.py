@@ -67,10 +67,10 @@ result=data1.join(data2)\
     .sortByKey()\
     .map(lambda (key,value):(key[0],(key[1],value)))\
     .reduceByKey(lambda a,b:a+b)\
+    .filter(lambda (key,value):(len(value)==4))\
     .sortByKey()
 
 out=open("output/working_retired.csv","w+")
 for (key,value) in result.collect():
-    value= reduce(lambda a, b: "%s,%s" % (a, b),value).encode("utf-8")
-    out.write("%s,%s\n" % (key,value))
+    out.write("%s,%d,%s,%d,%s,%d\n"%(key,value[1]+value[3],value[0],value[1],value[2],value[3]))
 out.close()
