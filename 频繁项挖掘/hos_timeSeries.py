@@ -68,7 +68,7 @@ data=data.map(hospitalProcessing) \
     .reduceByKey(lambda a,b:a+b)\
     .sortByKey()
 
-###（(个人编号 ),(就诊时间 21，就诊医院 3,医院等级 5，住院天数，统筹支付 17,个人支付 20)))）
+###（(个人编号 ),(入院时间，出院时间)）
 out = open('output/hos_timeSeries.csv', 'w+')
 for (key,value) in data.collect():
   line= reduce(lambda a, b: "%s,%s"%(a,b),value).encode("utf-8")

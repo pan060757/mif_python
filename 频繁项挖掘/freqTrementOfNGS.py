@@ -21,13 +21,13 @@ for num in reader:
     trement.add(num.strip("\n").split(',')[0])
 trement_broadcast=sc.broadcast(trement)
 
-def removeDuplicate((key,value)):
-    dup=[]
-    values=value.split(',')
-    for v in values:
-        if v not in dup:
-            dup.append(v)
-    return (key,value)
+# def removeDuplicate((key,value)):
+#     values=value.split(',')
+#     dup = values[0]
+#     for v in values:
+#         if v not in dup:
+#             dup=dup+' '+v
+#     return (key,dup)
 
 
 data = sc.textFile("/mif/data_new/worker_hospital_detail.txt")
@@ -37,14 +37,12 @@ data = data.map(lambda line: line.split(','))
 trement_nums = data.filter(lambda line: line[0] in nums_broadcast.value)
 trement_ngs=trement_nums.filter(lambda line:line[1] in trement_broadcast.value)
 trement_bkt_withNum = trement_ngs.map(lambda line: ((line[0], line[2]), 1)) \
-    .reduceByKey(lambda a, b: a) \
-    .map(lambda (k, v): (k[0], k[1])) \
-    .reduceByKey(lambda a,b:a+','+b)\
-    .map(removeDuplicate)
+    .reduceByKey(lambda a, b: a+b) \
+    .map(lambda (key,value):(key[0],key[1]))\
+    .reduceByKey(lambda a,b:a+' '+b)
 
 ####(人员编号，诊断集合)
 out=open('output/freqTrementOfNGS.csv','w+')
 for (key,value)in trement_bkt_withNum.collect():
-    line = reduce(lambda a, b: "%s,%s" % (a, b),value)
     out.write("%s\n"%(value))
 out.close()
